@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -48,17 +49,17 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
 
         jTableProducao.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null}
+                {null, null, null, null, null}
             },
             new String [] {
-                "Id", "Produto", "Quantidade", "Pago"
+                "Id", "Produto", "Quantidade", "Quantidade a ser pago", "Pago"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class
+                java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                true, true, true, false
+                false, false, false, true, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -91,22 +92,17 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 368, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 366, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(170, 170, 170)
-                                .addComponent(jLabel1)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(170, 170, 170)
+                        .addComponent(jLabel1)
+                        .addGap(0, 92, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(67, Short.MAX_VALUE)
+                .addContainerGap(101, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -121,11 +117,37 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        System.out.println(jTableProducao.getSelectedRow());
-        ViewPagamento vp = new ViewPagamento(null, true);
-        vp.setResizable(false);
-        vp.setLocationRelativeTo(null);
-        vp.setVisible(true);
+        int Cont = 0;
+        double soma = 0.0;
+        for (int i = 0; i < jTableProducao.getRowCount(); i++) {
+            if ((boolean) jTableProducao.getValueAt(i, 4)) {
+                Cont++;
+                String quant1 = (String) jTableProducao.getValueAt(i, 2);
+                String quant2 = (String) jTableProducao.getValueAt(i, 3);
+                double quantidade1 = Double.parseDouble(quant1.replace(',', '.'));
+                String conv = "";
+                int cont = 0;
+                for (int j = 0; j < quant2.length(); j++) {
+                    if (quant2.charAt(j) == ',') {
+                        conv = conv + ".";
+                        cont++;
+                    }
+                }
+                if (cont > 1) {
+                    JOptionPane.showMessageDialog(null, "Quantidade informada possui mais de uma virgula");
+                    break;
+                }
+            }
+        }
+        if (Cont > 0) {
+            ViewPagamento vp = new ViewPagamento(null, true);
+            vp.setResizable(false);
+            vp.setLocationRelativeTo(null);
+            vp.setVisible(true);
+        }else{
+            JOptionPane.showMessageDialog(null, "Selecione ao menos um serviço a ser pago");
+        }
+
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -178,15 +200,21 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
             PreparedStatement cnd = con.prepareStatement(query);
             ResultSet rs = cnd.executeQuery();
             if (rs.next()) {
+                String quan = rs.getString("quantidade").replace(".", ",");
                 model.addRow(new Object[]{
                     rs.getString("id_produto"),
                     this.mostraProduto(rs.getString("id_produto")),
-                    rs.getString("quantidade")});
+                    quan,
+                    "",
+                    false});
                 while (rs.next()) {
+                    quan = rs.getString("quantidade").replace(".", ",");
                     model.addRow(new Object[]{
                         rs.getString("id_produto"),
                         this.mostraProduto(rs.getString("id_produto")),
-                        rs.getString("quantidade")});
+                        quan,
+                        "",
+                        false});
                 }
                 cnd.close();
                 con.close();

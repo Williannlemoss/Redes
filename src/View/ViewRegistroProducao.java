@@ -57,11 +57,27 @@ public class ViewRegistroProducao extends javax.swing.JFrame {
                 {null, null, null, null, null, null}
             },
             new String [] {
-                "Id", "Funcionario", "Serviço", "Pago", "Data lançamento", "Data pagamento"
+                "Id", "Funcionario", "Serviço", "Data lançamento", "Data pagamento", "pago"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jTable1.setToolTipText("");
         jScrollPane1.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setHeaderValue("Id");
+            jTable1.getColumnModel().getColumn(1).setHeaderValue("Funcionario");
+            jTable1.getColumnModel().getColumn(2).setHeaderValue("Serviço");
+            jTable1.getColumnModel().getColumn(3).setHeaderValue("Data lançamento");
+            jTable1.getColumnModel().getColumn(4).setHeaderValue("Data pagamento");
+            jTable1.getColumnModel().getColumn(5).setHeaderValue("pago");
+        }
 
         jButton1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jButton1.setText("Excluir ");
@@ -85,15 +101,11 @@ public class ViewRegistroProducao extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(159, 159, 159)
-                .addComponent(jLabel1)
-                .addContainerGap(452, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 777, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(jButton2)
@@ -103,6 +115,10 @@ public class ViewRegistroProducao extends javax.swing.JFrame {
                                 .addComponent(jButton3))))
                     .addComponent(jSeparator1))
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(196, 196, 196)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -172,44 +188,36 @@ public class ViewRegistroProducao extends javax.swing.JFrame {
     private void motrarRegistro() {
         try {
             Connection con = ConnectionFactory.getConnection();
-            String query = ("select  * from registro_producao where pagar = 0 order by data asc");
+            String query = ("select  * from registro_producao order by data asc");
             PreparedStatement cnd = con.prepareStatement(query);
             ResultSet rs = cnd.executeQuery();
             if (rs.next()) {
                 String dataInvetida = rs.getString("data");
                 String data = dataInvetida.substring(8, 10) + "/" + dataInvetida.substring(5, 7) + "/" + dataInvetida.substring(0, 4);
-                String pago = rs.getString("pagar");
-               
-                if (pago.equals("0")) {
-                    pago = "Não pago";
-                } else {
-                    pago = "pago";
-                }
+                Boolean pago = rs.getBoolean("pagar");
                 String func = this.mostraFunc(rs.getString("id_funcionario"));
                 String servi = this.mostraServi(rs.getString("id_servico"));
                 model.addRow(new Object[]{
                     rs.getString("id"),
                     func,
                     servi,
-                    pago,
-                    data});
+                    data,
+                    "",
+                    pago});
                 while (rs.next()) {
                     dataInvetida = rs.getString("data");
                     data = dataInvetida.substring(8, 10) + "/" + dataInvetida.substring(5, 7) + "/" + dataInvetida.substring(0, 4);
-                    pago = rs.getString("pagar");
-                    if (pago.equals("0")) {
-                        pago = "Não pago";
-                    } else {
-                        pago = "pago";
-                    }
+                    pago = rs.getBoolean("pagar");
+                    
                     func = this.mostraFunc(rs.getString("id_funcionario"));
                     servi = this.mostraServi(rs.getString("id_servico"));
                     model.addRow(new Object[]{
                         rs.getString("id"),
                         func,
                         servi,
-                        pago,
-                        data});
+                        data,
+                        ""
+                        ,pago});
                 }
                 cnd.close();
                 con.close();

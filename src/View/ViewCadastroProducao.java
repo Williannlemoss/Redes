@@ -254,7 +254,7 @@ public class ViewCadastroProducao extends javax.swing.JDialog {
                 stmt.setInt(2, this.jComboBoxFunc.getSelectedIndex());
                 stmt.setInt(3, this.jComboBoxServico.getSelectedIndex());
                 stmt.executeUpdate();
-
+                
                 //--------------------------------------------------
                 query = "select count(*) from registro_producao";
                 stmt = con.prepareStatement(query);
