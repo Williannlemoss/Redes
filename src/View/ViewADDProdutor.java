@@ -39,11 +39,11 @@ public class ViewADDProdutor extends javax.swing.JDialog {
 
         jComboBoxProd = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
-        jTextFieldQuant = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
+        jTextFieldQuant = new javax.swing.JFormattedTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -52,8 +52,6 @@ public class ViewADDProdutor extends javax.swing.JDialog {
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel3.setText("Produto");
-
-        jTextFieldQuant.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
 
         jButton1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/icons8-plus-math-30.png"))); // NOI18N
@@ -69,6 +67,9 @@ public class ViewADDProdutor extends javax.swing.JDialog {
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
         jLabel1.setText("Adicionar Produto");
+
+        jTextFieldQuant.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        jTextFieldQuant.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -115,7 +116,7 @@ public class ViewADDProdutor extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jTextFieldQuant, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextFieldQuant, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(48, 48, 48)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -135,9 +136,10 @@ public class ViewADDProdutor extends javax.swing.JDialog {
                     (String) this.jComboBoxProd.getSelectedItem(),
                     this.jTextFieldQuant.getText()});
             } else {
-                double quat1 = Double.parseDouble((String)model.getValueAt(id, 2));
-                double quat2 = Double.parseDouble(this.jTextFieldQuant.getText());
-                model.setValueAt(quat1 + quat2, id, 2);
+                double quat1 = Double.parseDouble(((String)model.getValueAt(id, 2)).replace(",", "."));
+                double quat2 = Double.parseDouble(this.jTextFieldQuant.getText().replace(",", "."));
+                String soma = Double.toString(quat1 + quat2);
+                model.setValueAt(soma.replace(".", ","), id, 2);
             }
             this.jComboBoxProd.setSelectedIndex(0);
             this.jTextFieldQuant.setText("");
@@ -175,6 +177,6 @@ public class ViewADDProdutor extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextField jTextFieldQuant;
+    private javax.swing.JFormattedTextField jTextFieldQuant;
     // End of variables declaration//GEN-END:variables
 }
