@@ -128,10 +128,17 @@ public class ViewADDProdutor extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         if (this.verifica()) {
-            model.addRow(new Object[]{
-                this.jComboBoxProd.getSelectedIndex(),
-                (String) this.jComboBoxProd.getSelectedItem(),
-                this.jTextFieldQuant.getText()});
+            int id = this.procuraProduto(this.jComboBoxProd.getSelectedIndex());
+            if (id == -1) {
+                model.addRow(new Object[]{
+                    this.jComboBoxProd.getSelectedIndex(),
+                    (String) this.jComboBoxProd.getSelectedItem(),
+                    this.jTextFieldQuant.getText()});
+            } else {
+                double quat1 = Double.parseDouble((String)model.getValueAt(id, 2));
+                double quat2 = Double.parseDouble(this.jTextFieldQuant.getText());
+                model.setValueAt(quat1 + quat2, id, 2);
+            }
             this.jComboBoxProd.setSelectedIndex(0);
             this.jTextFieldQuant.setText("");
         }
@@ -149,6 +156,15 @@ public class ViewADDProdutor extends javax.swing.JDialog {
             return false;
         }
         return true;
+    }
+
+    public int procuraProduto(int id) {
+        for (int i = 0; i < model.getRowCount(); i++) {
+            if (this.jComboBoxProd.getSelectedIndex() == (int) model.getValueAt(i, 0)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private final DefaultTableModel model;
