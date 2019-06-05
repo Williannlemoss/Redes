@@ -22,12 +22,15 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
     /**
      * Creates new form ViewVisualizarProdutos
      */
+    String idRegistro;
+
     public ViewVisualizarProdutos(java.awt.Frame parent, boolean modal, String id) {
         super(parent, modal);
         initComponents();
         this.model = (DefaultTableModel) this.jTableProducao.getModel();
         this.model.setNumRows(0);
         this.mostrar(id);
+        idRegistro = id;
     }
 
     /**
@@ -94,7 +97,7 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(170, 170, 170)
                         .addComponent(jLabel1)
-                        .addGap(0, 92, Short.MAX_VALUE))
+                        .addGap(0, 257, Short.MAX_VALUE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
@@ -102,7 +105,7 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(101, Short.MAX_VALUE)
+                .addContainerGap(136, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -117,37 +120,41 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        int Cont = 0;
-        double soma = 0.0;
-        for (int i = 0; i < jTableProducao.getRowCount(); i++) {
-            if ((boolean) jTableProducao.getValueAt(i, 4)) {
-                Cont++;
-                String quant1 = (String) jTableProducao.getValueAt(i, 2);
-                String quant2 = (String) jTableProducao.getValueAt(i, 3);
-                double quantidade1 = Double.parseDouble(quant1.replace(',', '.'));
-                String conv = "";
-                int cont = 0;
-                for (int j = 0; j < quant2.length(); j++) {
-                    if (quant2.charAt(j) == ',') {
-                        conv = conv + ".";
-                        cont++;
+        if (this.verifica()) {
+            for (int i = 0; i < jTableProducao.getRowCount(); i++) {
+                if ((boolean) jTableProducao.getValueAt(i, 4)) {
+                    String quant1 = (String) jTableProducao.getValueAt(i, 2);
+                    String quant2 = (String) jTableProducao.getValueAt(i, 3);
+                    double quantidade1 = Double.parseDouble(quant1.replace(',', '.'));
+                    String conv = "";
+                    for (int j = 0; j < quant2.length(); j++) {
+                        if (quant2.charAt(j) == ',') {
+                            conv = conv + ".";
+                        } else {
+                            conv = conv + quant2.charAt(j);
+                        }
                     }
-                }
-                if (cont > 1) {
-                    JOptionPane.showMessageDialog(null, "Quantidade informada possui mais de uma virgula");
-                    break;
+                    double quantidade2 = Double.parseDouble(conv);
+                    try {
+                        Connection con = ConnectionFactory.getConnection();
+                        String query = ("UPDATE registro_produto SET quantidade = ? WHERE id_registro = " + idRegistro
+                                + " and id_produto =" + (String) jTableProducao.getValueAt(i, 0));
+                        PreparedStatement cnd = con.prepareStatement(query);
+                        cnd.setDouble(1, quantidade1 - quantidade2);
+                        cnd.executeUpdate();
+                        this.model.setNumRows(0);
+                        this.mostrar(this.idRegistro);
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(null, "ERROR CONEXÃO");
+                    }
+
                 }
             }
-        }
-        if (Cont > 0) {
             ViewPagamento vp = new ViewPagamento(null, true);
             vp.setResizable(false);
             vp.setLocationRelativeTo(null);
             vp.setVisible(true);
-        }else{
-            JOptionPane.showMessageDialog(null, "Selecione ao menos um serviço a ser pago");
         }
-
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -226,10 +233,9 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
     }
 
     private String mostraProduto(String id) {
-        Connection con;
         try {
-            con = ConnectionFactory.getConnection();
-            String query = ("select nome_produto from produto where id = " + id);
+            Connection con = ConnectionFactory.getConnection();
+            String query = ("select * from produto where id = " + id);
             PreparedStatement cnd = con.prepareStatement(query);
             ResultSet rs = cnd.executeQuery();
             rs.next();
@@ -247,4 +253,53 @@ public class ViewVisualizarProdutos extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTable jTableProducao;
     // End of variables declaration//GEN-END:variables
+
+    private boolean verifica() {
+        boolean verifica = true;
+        int cont1 = 0;
+
+        for (int i = 0; i < jTableProducao.getRowCount(); i++) {
+            if ((boolean) jTableProducao.getValueAt(i, 4)) {
+                cont1++;
+                if ("".equals((String) jTableProducao.getValueAt(i, 3))) {
+                    JOptionPane.showMessageDialog(null, "Informe a quantidade a ser pago na linha " + " " + i + 1);
+                    jTableProducao.setValueAt(false, i, 4);
+                    verifica = false;
+                    break;
+                }
+                String quant1 = (String) jTableProducao.getValueAt(i, 2);
+                String quant2 = (String) jTableProducao.getValueAt(i, 3);
+                double quantidade1 = Double.parseDouble(quant1.replace(',', '.'));
+                String conv = "";
+                int cont = 0;
+                for (int j = 0; j < quant2.length(); j++) {
+                    if (quant2.charAt(j) == ',') {
+                        conv = conv + ".";
+                        cont++;
+                    } else {
+                        conv = conv + quant2.charAt(j);
+                    }
+                }
+                double quantidade2 = Double.parseDouble(conv);
+                if (cont > 1) {
+                    JOptionPane.showMessageDialog(null, "Quantidade informada na linha " + " " + i + 1 + " possui mais de uma virgula");
+                    jTableProducao.setValueAt(false, i, 4);
+                    verifica = false;
+                    break;
+                }
+
+                if (quantidade1 < quantidade2) {
+                    JOptionPane.showMessageDialog(null, "Quantidade a ser pago é maior do que a quantidade total na linha " + " " + i + 1);
+                    verifica = false;
+                    jTableProducao.setValueAt(false, i, 4);
+                    break;
+                }
+            }
+        }
+        if (cont1 == 0) {
+            verifica = false;
+            JOptionPane.showMessageDialog(null, "Selecione uma linha a ser pago");
+        }
+        return verifica;
+    }
 }
